@@ -1,82 +1,56 @@
 #include <iostream>
 #include <cmath>
+
 using namespace std;
 
-// 定义常量
-const double PI = 3.14159265358979323846;
-
-// 函数：将度分秒转换为十进制度数
-double toDecimalDegrees(int degrees, int minutes, double seconds) {
-    return degrees + minutes / 60.0 + seconds / 3600.0;
-}
-
-// 函数：将角度转换为弧度
-double toRadians(double degrees) {
-    return degrees * PI / 180.0;
-}
-
-// 函数：计算两条边和夹角的余弦定理
-double calculateSide(double a, double b, double angle) {
-    return sqrt(a * a + b * b - 2 * a * b * cos(toRadians(angle)));
+// 将度分秒转换为弧度
+double dmsToRadians(int degrees, int minutes, int seconds) {
+    double decimalDegrees = degrees + minutes / 60.0 + seconds / 3600.0;
+    return decimalDegrees * M_PI / 180.0; // 转换为弧度
 }
 
 int main() {
-    // 输入已知的三条边的长度
-    double a, b, c;
-    cout << "请输入五边形的三条相邻边的长度 a, b, c: ";
-    cin >> a >> b >> c;
+    // 输入已知边长
+    double AB, BC, CD;
+    cout << "请输入三条相邻边的长度 (AB, BC, CD): ";
+    cin >> AB >> BC >> CD;
 
     // 输入五个内角的度分秒
-    int angleADeg, angleAMin;
-    double angleASec;
-    int angleBDeg, angleBMin;
-    double angleBSec;
-    int angleCDeg, angleCMin;
-    double angleCSec;
-    int angleDDeg, angleDMin;
-    double angleDSec;
-    int angleEDeg, angleEMin;
-    double angleESec;
-
-    cout << "请输入五边形的五个内角的度分秒（格式：度 分 秒）: " << endl;
-    cout << "角A: ";
-    cin >> angleADeg >> angleAMin >> angleASec;
-    cout << "角B: ";
-    cin >> angleBDeg >> angleBMin >> angleBSec;
-    cout << "角C: ";
-    cin >> angleCDeg >> angleCMin >> angleCSec;
-    cout << "角D: ";
-    cin >> angleDDeg >> angleDMin >> angleDSec;
-    cout << "角E: ";
-    cin >> angleEDeg >> angleEMin >> angleESec;
-
-    // 将度分秒转换为十进制度数
-    double angleA = toDecimalDegrees(angleADeg, angleAMin, angleASec);
-    double angleB = toDecimalDegrees(angleBDeg, angleBMin, angleBSec);
-    double angleC = toDecimalDegrees(angleCDeg, angleCMin, angleCSec);
-    double angleD = toDecimalDegrees(angleDDeg, angleDMin, angleDSec);
-    double angleE = toDecimalDegrees(angleEDeg, angleEMin, angleESec);
-
-    // 检查内角和是否为540度
-    double angleSum = angleA + angleB + angleC + angleD + angleE;
-    if (abs(angleSum - 540.0) > 0.001) {
-        cout << "输入的内角和不等于540度，无法构成五边形！" << endl;
-        return 1;
+    int angles[5][3]; // 每个角度存储 [度, 分, 秒]
+    for (int i = 0; i < 5; ++i) {
+        cout << "请输入第 " << i + 1 << " 个内角的度分秒（格式：度 分 秒）: ";
+        cin >> angles[i][0] >> angles[i][1] >> angles[i][2];
     }
 
-    // 假设五边形可以通过某些几何关系近似求解
-    // 计算对角线 d 的长度（假设 d 是连接顶点 A 和 C 的对角线）
-    double d = calculateSide(a, b, 180.0 - angleA);
+    // 将五个内角转换为弧度
+    double angleA = dmsToRadians(angles[0][0], angles[0][1], angles[0][2]);
+    double angleB = dmsToRadians(angles[1][0], angles[1][1], angles[1][2]);
+    double angleC = dmsToRadians(angles[2][0], angles[2][1], angles[2][2]);
+    double angleD = dmsToRadians(angles[3][0], angles[3][1], angles[3][2]);
+    double angleE = dmsToRadians(angles[4][0], angles[4][1], angles[4][2]);
 
-    // 假设对角线 d 和边 c 可以构成另一个三角形
-    // 计算边 e 的长度（假设 e 是连接顶点 C 和 E 的边）
-    double e = calculateSide(d, c, 180.0 - angleC);
+    // 计算剩余两条边 DE 和 EA
+    // 使用余弦定理逐步计算
+    double BD; // 对角线 BD 的长度
+    double BE; // 对角线 BE 的长度
+
+    // 计算对角线 BD 的长度（通过三角形 ABD）
+    BD = sqrt(AB * AB + BC * BC - 2 * AB * BC * cos(angleB));
+
+    // 计算对角线 BE 的长度（通过三角形 BCD）
+    BE = sqrt(BC * BC + CD * CD - 2 * BC * CD * cos(angleC));
+
+    // 计算边 DE 的长度（通过三角形 BDE）
+    double angleDBE = angleE - angleB; // BDE 角度差
+    double DE = sqrt(BD * BD + BE * BE - 2 * BD * BE * cos(angleDBE));
+
+    // 计算边 EA 的长度（通过三角形 ABE）
+    double angleABE = angleA + angleB; // ABE 角度和
+    double EA = sqrt(AB * AB + BE * BE - 2 * AB * BE * cos(angleABE));
 
     // 输出结果
-    cout << "计算得到的另外两条边的长度为：" << endl;
-    cout << "对角线 d = " << d << endl;
-    cout << "边 e = " << e << endl;
+    cout << "边 DE 的长度为: " << DE << endl;
+    cout << "边 EA 的长度为: " << EA << endl;
 
     return 0;
 }
-    
